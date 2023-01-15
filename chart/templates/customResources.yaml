@@ -1,6 +1,6 @@
 {{- range $rscName, $rscDef := $.Values.customResources }}
 {{- range $instanceName, $instanceConf := $rscDef.instances }}
-{{- $instanceDef := merge $instanceConf (dict "metadata" (dict "name" $instanceName )) }}
+{{- $instanceDef := merge $instanceConf (dict "metadata" (dict "name" $instanceName "labels" (dict "helm.sh/release" $.Release.Name) )) }}
 {{- $fullInstanceDef := merge $instanceDef $rscDef.definition }}
 ---
 {{- toYaml $fullInstanceDef }}
