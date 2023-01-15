@@ -1,0 +1,82 @@
+{{- range $deploymentName, $deploymentConf := .Values.deployments }}
+---
+apiVersion: {{ default "apps/v1" $deploymentConf.apiVersion }}
+kind: Deployment
+metadata:
+  name: "{{ $deploymentName }}"
+  labels:
+    helm.sh/release: "{{ $.Release.Name }}"
+    {{- include "get.labels" $deploymentConf | nindent 4 }}
+  annotations:
+    {{- include "config.checksum" $.Values | nindent 4 -}}
+    {{- include "get.annotations" $deploymentConf | nindent 4 }}
+spec:
+  {{- with $deploymentConf.minReadySeconds }}
+  minReadySeconds: {{ $deploymentConf.minReadySeconds }}
+  {{- end }}
+  {{- if $deploymentConf.paused }}
+  paused: {{ $deploymentConf.paused }}
+  {{- end }}
+  {{- if $deploymentConf.progressDeadlineSeconds }}
+  progressDeadlineSeconds: {{ $deploymentConf.progressDeadlineSeconds }}
+  {{- end }}
+  {{- if $deploymentConf.replicas }}
+  replicas: {{ $deploymentConf.replicas }}
+  {{- end }}
+  {{- if $deploymentConf.revisionHistoryLimit }}
+  revisionHistoryLimit: {{ $deploymentConf.revisionHistoryLimit }}
+  {{- end }}
+  {{- if $deploymentConf.strategy }}
+  strategy:
+    {{- toYaml $deploymentConf.strategy | nindent 4}}
+  {{- end }}
+  selector:
+    matchLabels:
+      helm.sh/release: "{{ $.Release.Name }}"
+      deployment: "{{ $deploymentName }}"
+      {{- include "get.labels" $deploymentConf | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        helm.sh/release: "{{ $.Release.Name }}"
+        deployment: "{{ $deploymentName }}"
+        {{- include "get.labels" $deploymentConf | nindent 8 }}
+      annotations:
+        {{- include "config.checksum" $.Values | nindent 8 }}
+        {{- include "get.annotations" $deploymentConf | nindent 8 }}
+    spec:
+      {{- include "spec.pod" $deploymentConf.pod | nindent 6 }}
+
+{{- with $deploymentConf.service }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: "{{ $deploymentName }}"
+  {{- if .annotations }}
+  labels:
+    helm.sh/release: "{{ $.Release.Name }}"
+    deployment: "{{ $deploymentName }}"
+    {{- include "get.labels" $deploymentConf | nindent 4 }}
+  annotations:
+    {{- include "get.annotations" . | nindent 4 }}
+  {{- end }}
+spec:
+  selector:
+    helm.sh/release: "{{ $.Release.Name }}"
+    deployment: "{{ $deploymentName }}"
+    {{- include "get.labels" $deploymentConf | nindent 4 }}
+  ports:
+  {{- range $containerName, $containerConf := $deploymentConf.pod.containers }}
+  {{- range $portName, $portConf := $containerConf.ports }}
+    - name: {{ $portName }}
+      protocol: {{ coalesce $portConf.protocol "TCP" }}
+      port: {{ coalesce $portConf.servicePort $portConf.containerPort }}
+      targetPort: {{ $portConf.containerPort }}
+  {{- end }}
+  {{- end }}
+  {{- with $deploymentConf.service.spec }}
+  {{- toYaml . | nindent 2 }}
+  {{- end }}
+{{- end }}
+{{- end }}

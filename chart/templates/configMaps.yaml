@@ -1,0 +1,11 @@
+{{- range $cmName, $cmData := $.Values.configMaps }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ $cmName }}
+  labels:
+    helm.sh/release: "{{ $.Release.Name }}"
+data:
+  {{- toYaml $cmData | nindent 2 }}
+{{- end }}
