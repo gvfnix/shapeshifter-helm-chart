@@ -1,0 +1,31 @@
+configMaps:
+  first:
+    bash.properties: |
+      set -a
+      PATH=/sbin:/bin:/usr/sbin:/usr/bin/:/usr/local/sbin:/usr/local/bin
+deployments:
+  first:
+    labels:
+      foo: bar
+    annotations:
+      meta: "logo"
+statefulSets:
+  first: {}
+cronJobs:
+  first:
+    schedule: "0 * * * *"
+    command: [bash]
+    args: [-c, sleep 10]
+hooks:
+  first:
+    when: pre-install
+    command: [bash]
+    args: [-c, sleep 10]
+serviceAccounts:
+  service1:
+    permissionsType: Role
+    permissions:
+      readPods:
+        apiGroups: [""]
+        resources: ["pods"]
+        verbs: ["get", "watch", "list"]
