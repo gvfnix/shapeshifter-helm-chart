@@ -1,15 +1,17 @@
 #!/bin/bash
 _indent=2
+_src="\$containerConf"
 for attribute in $@; do
     attrName=${attribute/:*}
     attrType=${attribute/*:}
     if [[ $attrName = "--indent" ]]; then _indent=$attrType; continue; fi
-    echo "{{- with \$$attrName := coalesce ($deploymentConf.pod).$attrName (\$.Values.general.deployments.pod).$attrName (\$.Values.general.pods).$attrName }}"
+    if [[ $attrName = "--src" ]]; then _src="${attrType}"; continue; fi
+    echo "{{- with $_src.$attrName }}"
     if [[ $attrType = "yaml" ]]; then
         echo "$attrName:"
-        echo "  {{- toYaml \$$attrName | nindent $_indent }}"
+        echo "{{- toYaml . | nindent $_indent }}"
     else
-        echo "$attrName: {{ \$$attrName }}"
+        echo "$attrName: {{ . }}"
     fi;
     echo "{{- end }}"
 done

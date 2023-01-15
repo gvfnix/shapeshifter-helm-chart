@@ -1,12 +1,14 @@
 {{- range $deploymentName, $deploymentConf := .Values.deployments }}
-apiVersion: apps/v1
+---
+apiVersion: {{ default "apps/v1" $deploymentConf.apiVersion }}
 kind: Deployment
 metadata:
-  name: "{{ $.Release.Name }}-{{ $deploymentName }}"
+  name: "{{ $deploymentName }}"
   labels:
+    helm.sh/release: "{{ $.Release.Name }}"
     {{- include "get.labels" $deploymentConf | nindent 4 }}
   annotations:
-    config/checksum: "{{ toJson $.Values.configMaps | sha1sum }}"
+    {{- include "config.checksum" $.Values | nindent 4 -}}
     {{- include "get.annotations" $deploymentConf | nindent 4 }}
 spec:
   {{- with $deploymentConf.minReadySeconds }}
@@ -30,115 +32,51 @@ spec:
   {{- end }}
   selector:
     matchLabels:
-      deployment: "{{ $.Release.Name }}-{{ $deploymentName }}"
+      helm.sh/release: "{{ $.Release.Name }}"
+      deployment: "{{ $deploymentName }}"
       {{- include "get.labels" $deploymentConf | nindent 6 }}
   template:
     metadata:
       labels:
-        deployment: "{{ $.Release.Name }}-{{ $deploymentName }}"
+        helm.sh/release: "{{ $.Release.Name }}"
+        deployment: "{{ $deploymentName }}"
         {{- include "get.labels" $deploymentConf | nindent 8 }}
       annotations:
-        config/checksum: "{{ toJson $.Values.configMaps | sha1sum }}"
+        {{- include "config.checksum" $.Values | nindent 8 }}
         {{- include "get.annotations" $deploymentConf | nindent 8 }}
     spec:
-      {{- with $activeDeadlineSeconds := ($deploymentConf.pod).activeDeadlineSeconds }}
-      activeDeadlineSeconds: {{ $activeDeadlineSeconds }}
-      {{- end }}
-      {{- with $affinity := ($deploymentConf.pod).affinity }}
-      affinity:
-        {{- toYaml $affinity | nindent 8 }}
-      {{- end }}
-      {{- with $automountServiceAccountToken := coalesce ($deploymentConf.pod).automountServiceAccountToken }}
-      automountServiceAccountToken: {{ $automountServiceAccountToken }}
-      {{- end }}
-      {{- with $dnsConfig := coalesce ($deploymentConf.pod).dnsConfig ($.Values.general.deployments.pod).dnsConfig ($.Values.general.pods).dnsConfig }}
-      dnsConfig:
-        {{- toYaml $dnsConfig | nindent 8 }}
-      {{- end }}
-      {{- with $dnsPolicy := coalesce ($deploymentConf.pod).dnsPolicy ($.Values.general.deployments.pod).dnsPolicy ($.Values.general.pods).dnsPolicy }}
-      dnsPolicy: {{ $dnsPolicy }}
-      {{- end }}
-      {{- with $enableServiceLinks := coalesce ($deploymentConf.pod).enableServiceLinks ($.Values.general.deployments.pod).enableServiceLinks ($.Values.general.pods).enableServiceLinks }}
-      enableServiceLinks: {{ $enableServiceLinks }}
-      {{- end }}
-      {{- with $hostAliases := coalesce ($deploymentConf.pod).hostAliases ($.Values.general.deployments.pod).hostAliases ($.Values.general.pods).hostAliases }}
-      hostAliases:
-        {{- toYaml $hostAliases | nindent 8 }}
-      {{- end }}
-      {{- with $hostIPC := coalesce ($deploymentConf.pod).hostIPC ($.Values.general.deployments.pod).hostIPC ($.Values.general.pods).hostIPC }}
-      hostIPC: {{ $hostIPC }}
-      {{- end }}
-      {{- with $hostNetwork := coalesce ($deploymentConf.pod).hostNetwork ($.Values.general.deployments.pod).hostNetwork ($.Values.general.pods).hostNetwork }}
-      hostNetwork: {{ $hostNetwork }}
-      {{- end }}
-      {{- with $hostPID := coalesce ($deploymentConf.pod).hostPID ($.Values.general.deployments.pod).hostPID ($.Values.general.pods).hostPID }}
-      hostPID: {{ $hostPID }}
-      {{- end }}
-      {{- with $hostname := coalesce ($deploymentConf.pod).hostname ($.Values.general.deployments.pod).hostname ($.Values.general.pods).hostname }}
-      hostname: {{ $hostname }}
-      {{- end }}
-      {{- with $imagePullSecrets := coalesce ($deploymentConf.pod).imagePullSecrets ($.Values.general.deployments.pod).imagePullSecrets ($.Values.general.pods).imagePullSecrets }}
-      imagePullSecrets:
-        {{- toYaml $imagePullSecrets | nindent 8 }}
-      {{- end }}
-      {{- with $nodename := coalesce ($deploymentConf.pod).nodename ($.Values.general.deployments.pod).nodename ($.Values.general.pods).nodename }}
-      nodename: {{ $nodename }}
-      {{- end }}
-      {{- with $nodeSelector := coalesce (.pod).nodeSelector ($.Values.general.deployments.pod).nodeSelector ($.Values.general.pods).nodeSelector }}
-      nodeSelector:
-        {{- toYaml $nodeSelector | nindent 8 }}
-      {{- end }}
-      {{- with $overhead := coalesce (.pod).overhead ($.Values.general.deployments.pod).overhead ($.Values.general.pods).overhead }}
-      overhead:
-        {{- toYaml $overhead | nindent 8 }}
-      {{- end }}
-      {{- with $preemptionPolicy := coalesce (.pod).preemptionPolicy ($.Values.general.deployments.pod).preemptionPolicy ($.Values.general.pods).preemptionPolicy }}
-      preemptionPolicy: {{ $preemptionPolicy }}
-      {{- end }}
-      {{- with $priority := coalesce (.pod).priority ($.Values.general.deployments.pod).priority ($.Values.general.pods).priority }}
-      priority: {{ $priority }}
-      {{- end }}
-      {{- with $priorityClassName := coalesce (.pod).priorityClassName ($.Values.general.deployments.pod).priorityClassName ($.Values.general.pods).priorityClassName }}
-      priorityClassName: {{ $priorityClassName }}
-      {{- end }}
-      {{- with $readinessGates := coalesce (.pod).readinessGates ($.Values.general.deployments.pod).readinessGates ($.Values.general.pods).readinessGates }}
-      readinessGates:
-        {{- toYaml $readinessGates | nindent 8 }}
-      {{- end }}
-      {{- with $restartPolicy := coalesce (.pod).restartPolicy ($.Values.general.deployments.pod).restartPolicy ($.Values.general.pods).restartPolicy }}
-      restartPolicy: {{ $restartPolicy }}
-      {{- end }}
-      {{- with $runtimeClassName := coalesce (.pod).runtimeClassName ($.Values.general.deployments.pod).runtimeClassName ($.Values.general.pods).runtimeClassName }}
-      runtimeClassName: {{ $runtimeClassName }}
-      {{- end }}
-      {{- with $schedulerName := coalesce (.pod).schedulerName ($.Values.general.deployments.pod).schedulerName ($.Values.general.pods).schedulerName }}
-      schedulerName: {{ $schedulerName }}
-      {{- end }}
-      {{- with $securityContext := coalesce (.pod).securityContext ($.Values.general.deployments.pod).securityContext ($.Values.general.pods).securityContext }}
-      securityContext:
-        {{- toYaml $securityContext | nindent 8 }}
-      {{- end }}
-      {{- with $serviceAccountName := coalesce (.pod).serviceAccountName ($.Values.general.deployments.pod).serviceAccountName ($.Values.general.pods).serviceAccountName }}
-      serviceAccountName: {{ $serviceAccountName }}
-      {{- end }}
-      {{- with $setHostnameAsFQDN := coalesce (.pod).setHostnameAsFQDN ($.Values.general.deployments.pod).setHostnameAsFQDN ($.Values.general.pods).setHostnameAsFQDN }}
-      setHostnameAsFQDN: {{ $setHostnameAsFQDN }}
-      {{- end }}
-      {{- with $shareProcessNamespace := coalesce (.pod).shareProcessNamespace ($.Values.general.deployments.pod).shareProcessNamespace ($.Values.general.pods).shareProcessNamespace }}
-      shareProcessNamespace: {{ $shareProcessNamespace }}
-      {{- end }}
-      {{- with $subdomain := coalesce (.pod).subdomain ($.Values.general.deployments.pod).subdomain ($.Values.general.pods).subdomain }}
-      subdomain: {{ $subdomain }}
-      {{- end }}
-      {{- with $terminationGracePeriodSeconds := coalesce (.pod).terminationGracePeriodSeconds ($.Values.general.deployments.pod).terminationGracePeriodSeconds ($.Values.general.pods).terminationGracePeriodSeconds }}
-      terminationGracePeriodSeconds: {{ $terminationGracePeriodSeconds }}
-      {{- end }}
-      {{- with $tolerations := coalesce (.pod).tolerations ($.Values.general.deployments.pod).tolerations ($.Values.general.pods).tolerations }}
-      tolerations:
-        {{- toYaml $tolerations | nindent 8 }}
-      {{- end }}
-      {{- with $topologySpreadConstraints := coalesce (.pod).topologySpreadConstraints ($.Values.general.deployments.pod).topologySpreadConstraints ($.Values.general.pods).topologySpreadConstraints }}
-      topologySpreadConstraints:
-        {{- toYaml $topologySpreadConstraints | nindent 8 }}
-      {{- end }}
+      {{- include "spec.pod" $deploymentConf.pod | nindent 6 }}
+
+{{- with $deploymentConf.service }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: "{{ $deploymentName }}"
+  {{- if .annotations }}
+  labels:
+    helm.sh/release: "{{ $.Release.Name }}"
+    deployment: "{{ $deploymentName }}"
+    {{- include "get.labels" $deploymentConf | nindent 4 }}
+  annotations:
+    {{- include "get.annotations" . | nindent 4 }}
+  {{- end }}
+spec:
+  selector:
+    helm.sh/release: "{{ $.Release.Name }}"
+    deployment: "{{ $deploymentName }}"
+    {{- include "get.labels" $deploymentConf | nindent 4 }}
+  ports:
+  {{- range $containerName, $containerConf := $deploymentConf.pod.containers }}
+  {{- range $portName, $portConf := $containerConf.ports }}
+    - name: {{ $portName }}
+      protocol: {{ coalesce $portConf.protocol "TCP" }}
+      port: {{ coalesce $portConf.servicePort $portConf.containerPort }}
+      targetPort: {{ $portConf.containerPort }}
+  {{- end }}
+  {{- end }}
+  {{- with $deploymentConf.service.spec }}
+  {{- toYaml . | nindent 2 }}
+  {{- end }}
+{{- end }}
 {{- end }}

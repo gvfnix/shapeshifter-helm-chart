@@ -1,0 +1,8 @@
+{{- range $rscName, $rscDef := $.Values.customResources }}
+{{- range $instanceName, $instanceConf := $rscDef.instances }}
+{{- $instanceDef := merge $instanceConf (dict "metadata" (dict "name" $instanceName )) }}
+{{- $fullInstanceDef := merge $instanceDef $rscDef.definition }}
+---
+{{- toYaml $fullInstanceDef }}
+{{- end }}
+{{- end}}
