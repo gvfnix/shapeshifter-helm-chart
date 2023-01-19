@@ -152,3 +152,81 @@ See https://github.com/bitnami-labs/sealed-secrets
 
 This snippet creates 2 `kafka.strimzi.io/v1beta2/KafkaTopic` resources with corresponding names.
 
+## Configuration reference
+
+### Deployments
+
+* `deployments.NAME` (map): configuration of the deployment.
+
+Deployment configuration parameters:
+* `apiVersion` (str): override default apiVersion for the deployment (default `apps/v1`). Implemented for outdated K8S versions compatibility.
+* `spec` (map): set deployment-specific parameters (see [DeploymentSpec](https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/deployment-v1/#DeploymentSpec) for more details).
+* `pod` (map): set pod-specific parameters (see below).
+* `service`: Service configuration (see below).
+
+
+### StatefulSets
+
+* `statefulSets.NAME` (map): configuration of the statefulSet.
+
+StatefulSet configuration parameters:
+
+* `apiVersion` (str): override default apiVersion for the deployment (default `apps/v1`). Implemented for outdated K8S versions compatibility.
+* `spec` (map): set statefulSet-specific parameters (see [StatefulSetSpec](https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/stateful-set-v1/#StatefulSetSpec)).
+* `pod` (map): set pod-specific parameters (see below).
+* `service`: Service configuration (see below).
+
+### Pods
+
+See [PodSpec](https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#PodSpec) for more details. All properties can be specified for pod template. If the property is not listed below, then it can be used just like in the docs. If the property is listed below, then it is modified.
+
+`volumes` (map): See below.
+`containers` (map): see below.
+
+### Volumes
+
+* `volume.NAME` (map): volume configuration.
+
+Volume configuration parameters are not modified. The only thing that changed is that `volumes` property is not a list, but is a map.
+
+    volumes:
+      persistentVolumeClaim:
+        claimName: "basic"
+
+### Containers
+
+* `containers.NAME` (map): container configuration.
+
+Container properties are mostly preserved from [ContainerSpec](https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#Container). Changed properties are listed below:
+
+* `image.repository` (string): repository of the container image.
+* `image.tag` (string): tag of the container image.
+* `image.pullPolicy` (string): imagePullPolicy to use.
+* `env` (map): environment variables. Each item should be set as `{"key": "value"}` or as `{"key": {"valueFrom": {...}}}`.
+* `mounts` (map): volume mounts. Each item should be set as `{"path": {"volume": "NAME"}}`. A path can be mounted from a single volume, but a volume can be mounted into multiple paths. Additional properties for path can be found [in API reference](https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes-1), e.g. `{"/mnt/one": {"volume": "one", "readOnly": true}}`.
+* `ports` (map): container ports. Minimal use is `{"NAME": {"containerPort": NUMBER}}`. Additional properties can be set as `hostIP`, `hostPort`, `protocol` (`TCP` or `UDP`) and `servicePort`. `servicePort` is applied when exposing container ports through a service. If `servicePort` is not set, then service will use `containerPort`.
+
+### Services
+
+Each `deployment` or `statefulSet` defined in values can be provided with a service like this:
+
+    #values.yml
+    deployments:
+      deploymentOne:
+        ...
+        service:
+          ...
+    statefulSets:
+      statefulSetOne:
+        ...
+        service:
+          ...
+
+If `service` property is a non-empty map, then the chart will add a `v1/Service` resource to the rendered set of resources.
+
+Service properties:
+
+* `annotations` (map).
+* `spec` (map): additional service properties (see [API reference](https://kubernetes.io/docs/reference/kubernetes-api/service-resources/service-v1/)).
+
+Currently service exposes all containerPorts.

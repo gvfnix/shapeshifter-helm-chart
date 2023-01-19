@@ -1,7 +1,0 @@
-# values.yml:
-customResources:
-  kafkaTopic1:
-    instances:
-      another:
-        spec:
-          topicName: another-topic
