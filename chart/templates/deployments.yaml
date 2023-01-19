@@ -11,24 +11,8 @@ metadata:
     {{- include "config.checksum" $.Values | nindent 4 -}}
     {{- include "get.annotations" $deploymentConf | nindent 4 }}
 spec:
-  {{- with $deploymentConf.minReadySeconds }}
-  minReadySeconds: {{ $deploymentConf.minReadySeconds }}
-  {{- end }}
-  {{- if $deploymentConf.paused }}
-  paused: {{ $deploymentConf.paused }}
-  {{- end }}
-  {{- if $deploymentConf.progressDeadlineSeconds }}
-  progressDeadlineSeconds: {{ $deploymentConf.progressDeadlineSeconds }}
-  {{- end }}
-  {{- if $deploymentConf.replicas }}
-  replicas: {{ $deploymentConf.replicas }}
-  {{- end }}
-  {{- if $deploymentConf.revisionHistoryLimit }}
-  revisionHistoryLimit: {{ $deploymentConf.revisionHistoryLimit }}
-  {{- end }}
-  {{- if $deploymentConf.strategy }}
-  strategy:
-    {{- toYaml $deploymentConf.strategy | nindent 4}}
+  {{- with $deploymentConf.spec }}
+  {{- toYaml . | nindent 2 }}
   {{- end }}
   selector:
     matchLabels:

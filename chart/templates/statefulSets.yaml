@@ -1,0 +1,81 @@
+{{- range $stsName, $stsConf := $.Values.statefulSets }}
+---
+apiVersion: {{ default "apps/v1" $stsConf.apiVersion }}
+kind: StatefulSet
+metadata:
+  name: "{{ $stsName }}"
+  labels:
+    helm.sh/release: "{{ $.Release.Name }}"
+    {{- include "get.labels" $stsConf | nindent 4 }}
+  annotations:
+    {{- include "config.checksum" $.Values | nindent 4 -}}
+    {{- include "get.annotations" $stsConf | nindent 4 }}
+spec:
+  {{- with $stsConf.spec }}
+  {{- toYaml . | nindent 2 }}
+  {{- end }}
+  serviceName: "{{ $stsName }}-headless"
+  selector:
+    matchLabels:
+      helm.sh/release: "{{ $.Release.Name }}"
+      statefulSet: "{{ $stsName }}"
+      {{- include "get.labels" $stsConf | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        helm.sh/release: "{{ $.Release.Name }}"
+        statefulSet: "{{ $stsName }}"
+        {{- include "get.labels" $stsConf | nindent 8 }}
+      annotations:
+        {{- include "config.checksum" $.Values | nindent 8 }}
+        {{- include "get.annotations" $stsConf | nindent 8 }}
+    spec:
+      {{- include "spec.pod" $stsConf.pod | nindent 6 }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: "{{ $stsName }}-headless"
+  labels:
+    helm.sh/release: "{{ $.Release.Name }}"
+    {{- include "get.labels" $stsConf | nindent 4 }}
+spec:
+  selector:
+    helm.sh/release: "{{ $.Release.Name }}"
+    {{- include "get.labels" $stsConf | nindent 4 }}
+  type: ClusterIP
+  clusterIP: None
+---
+{{- with $stsConf.service }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: "{{ $stsName }}"
+  {{- if .annotations }}
+  labels:
+    helm.sh/release: "{{ $.Release.Name }}"
+    statefulSet: "{{ $stsName }}"
+    {{- include "get.labels" $stsConf | nindent 4 }}
+  annotations:
+    {{- include "get.annotations" . | nindent 4 }}
+  {{- end }}
+spec:
+  selector:
+    helm.sh/release: "{{ $.Release.Name }}"
+    statefulSet: "{{ $stsName }}"
+    {{- include "get.labels" $stsConf | nindent 4 }}
+  ports:
+  {{- range $containerName, $containerConf := $stsConf.pod.containers }}
+  {{- range $portName, $portConf := $containerConf.ports }}
+    - name: {{ $portName }}
+      protocol: {{ coalesce $portConf.protocol "TCP" }}
+      port: {{ coalesce $portConf.servicePort $portConf.containerPort }}
+      targetPort: {{ $portConf.containerPort }}
+  {{- end }}
+  {{- end }}
+  {{- with $stsConf.service.spec }}
+  {{- toYaml . | nindent 2 }}
+  {{- end }}
+{{- end }}
+{{- end }}

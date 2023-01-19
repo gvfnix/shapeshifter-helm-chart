@@ -19,11 +19,11 @@ checksum.config: "{{ toJson $conf | sha1sum }}"
 {{- range $containerName, $containerConf := . }}
 - name: {{ $containerName }}
   image: {{ $containerConf.image.repository }}:{{ $containerConf.image.tag }}
-  {{- with $containerConf.imagePullPolicy }}
-  imagePullPolicy: {{ $containerConf.imagePullPolicy }}
+  {{- with $containerConf.image.pullPolicy }}
+  imagePullPolicy: {{ $containerConf.image.pullPolicy }}
   {{- end }}
-  {{- with $containerConf.entrypoint }}
-  entrypoint:
+  {{- with $containerConf.command }}
+  command:
     {{- toYaml . | nindent 4 }}
   {{- end }}
   {{- with $containerConf.args }}
@@ -195,6 +195,10 @@ schedulerName: {{ . }}
 {{- end }}
 containers:
 {{- include "spec.containers" .containers | nindent 2 }}
+{{- with .initContainers }}
+initContainers:
+{{- include "spec.containers" . | nindent 2 }}
+{{- end }}
 {{- with .runtimeClassName }}
 runtimeClassName: {{ . }}
 {{- end }}
