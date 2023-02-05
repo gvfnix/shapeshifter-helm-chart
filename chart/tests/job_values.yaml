@@ -1,0 +1,16 @@
+jobs:
+  db-migrator:
+    metadata:
+      annotations:
+        helm.sh/hook: pre-install,pre-upgrade
+        helm.sh/hook-delete-policy: hook-succeeded
+    spec:
+      backoffLimit: 0
+    pod:
+      containers:
+        migrator:
+          image:
+            repository: eu.gcr.io/my-project/db-migrator
+            tag: "0.3.15"
+          command: [bash]
+          args: [/migrate-database.sh]

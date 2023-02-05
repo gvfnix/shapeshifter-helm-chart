@@ -1,0 +1,28 @@
+suite: Test cronJob
+release:
+  name: test
+  revision: 1
+templates: [cronJobs.yaml]
+tests:
+  - it: Checks if cronJob is set correctly
+    values: [cronJob_values.yaml]
+    asserts:
+      - hasDocuments:
+          count: 1
+      - isKind:
+          of: CronJob
+      - equal:
+          path: metadata.name
+          value: collect-stats
+      - equal:
+          path: spec.jobTemplate.spec.template.spec.containers[0].name
+          value: stats-collector
+      - equal:
+          path: spec.jobTemplate.spec.backoffLimit
+          value: 2
+      - equal:
+          path: spec.concurrencyPolicy
+          value: Forbid
+      - equal:
+          path: spec.schedule
+          value: "0 * * * *"

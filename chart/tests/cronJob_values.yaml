@@ -1,0 +1,14 @@
+cronJobs:
+  collect-stats:
+    spec:
+      schedule: "0 * * * *"
+      concurrencyPolicy: Forbid
+    jobTemplate:
+      spec:
+        backoffLimit: 2
+      pod:
+        containers:
+          stats-collector:
+            image:
+              repository: nevermind
+              tag: nevermind

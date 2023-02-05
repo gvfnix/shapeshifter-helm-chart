@@ -1,0 +1,37 @@
+suite: Test environment variables
+release:
+  name: test
+  revision: 1
+templates: [deployments.yaml]
+tests:
+  - it: Checks if environment variables are set properly
+    values: [env_values.yaml]
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: CONF_FILE
+            value: /opt/conf.yaml
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: APP_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: app-credentials
+                key: password
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: EXTRA_CONF
+            valueFrom:
+              configMapKeyRef:
+                name: app-config
+                key: extras.properties
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: SHOW_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: .metadata.name
