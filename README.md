@@ -10,6 +10,8 @@ A chart user (developer or devops engineer) specifies the resources they need to
 * Secret
 * SealedSecret (bitnami)
 * ConfigMap
+* Job
+* CronJob
 * Custom resources
 
 As lists are not easy to merge, this chart is aimed to make overriding values as convenient as possible. It avoids lists usage in values.
@@ -125,6 +127,14 @@ See https://github.com/bitnami-labs/sealed-secrets
         encryptedData:
           password: |
             ...
+
+### Jobs
+
+See [test values](./chart/tests/job_values.yaml)
+
+### CronJobs
+
+See [test values](./chart/tests/cronJob_values.yaml)
 
 ### Custom resources
 
