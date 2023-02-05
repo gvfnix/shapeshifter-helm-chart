@@ -1,0 +1,39 @@
+suite: Test volumes
+release:
+  name: test
+  revision: 1
+templates: [deployments.yaml]
+tests:
+  - it: Checks volumes
+    values: [volumes_values.yaml]
+    asserts:
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: share
+            nfs:
+              server: share.fqdn.net
+              readOnly: true
+              path: /share
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: cache
+            emptyDir:
+              medium: Memory
+      - contains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: cache
+            mountPath: /var/cache
+      - contains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: cache
+            mountPath: /app/cache
+      - contains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: share
+            mountPath: /mnt/share
+            readOnly: true

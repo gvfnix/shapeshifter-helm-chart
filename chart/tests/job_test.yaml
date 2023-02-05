@@ -1,0 +1,22 @@
+suite: Test job spec
+release:
+  name: test
+  revision: 1
+templates: [jobs.yaml]
+tests:
+  - it: Checks job properties
+    values: [job_values.yaml]
+    asserts:
+      - isKind:
+          of: Job
+      - equal:
+          path: metadata.annotations.[helm.sh/hook]
+          value: pre-install,pre-upgrade
+      - equal:
+          path: spec.backoffLimit
+          value: 0
+      - equal:
+          path: spec.template.spec.containers[0].name
+          value: migrator
+      - hasDocuments:
+          count: 1

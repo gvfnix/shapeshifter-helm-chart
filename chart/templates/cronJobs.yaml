@@ -1,0 +1,25 @@
+{{- range $jobName, $jobConf := $.Values.cronJobs }}
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ $jobName }}
+  labels:
+    helm.sh/release: "{{ $.Release.Name }}"
+    {{- include "get.labels" $jobConf | nindent 4 }}
+  annotations:
+    {{- include "config.checksum" $.Values | nindent 4 -}}
+    {{- include "get.annotations" $jobConf | nindent 4 }}
+spec:
+  {{- with $jobConf.spec }}
+  {{- toYaml . | nindent 2 }}
+  {{- end }}
+  jobTemplate:
+    spec:
+      {{- with $jobConf.jobTemplate.spec }}
+      {{- toYaml . | nindent 6 }}
+      {{- end }}
+      template:
+        spec:
+          {{- include "spec.pod" $jobConf.jobTemplate.pod | nindent 10 }}
+{{- end }}

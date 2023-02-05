@@ -1,0 +1,25 @@
+deployments:
+  env:
+    pod:
+      containers:
+        app:
+          image:
+            repository: nevermind
+            tag: nevermind
+          env:
+            CONF_FILE: /opt/conf.yaml
+            APP_PASSWORD:
+              valueFrom:
+                secretKeyRef:
+                  name: app-credentials
+                  key: password
+            EXTRA_CONF:
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: extras.properties
+            SHOW_NAME:
+              valueFrom:
+                fieldRef:
+                  fieldPath: .metadata.name
+

@@ -1,0 +1,26 @@
+deployments:
+  mounts:
+    pod:
+      volumes:
+        share:
+          nfs:
+            server: share.fqdn.net
+            path: /share
+            readOnly: true
+        cache:
+          emptyDir:
+            medium: Memory
+      containers:
+        app:
+          image:
+            repository: eu.gcr.io/my-project/app
+            tag: "0.1.1"
+          mounts:
+            /var/cache:
+              volume: cache
+            /app/cache:
+              volume: cache
+            /mnt/share:
+              volume: share
+              readOnly: true
+      
