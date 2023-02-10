@@ -91,11 +91,11 @@ As it can be observed, `env` section here is a map rather than a list. This make
                 http:
                   containerPort: 9898
         service:
-            enable: true
-            metadata:
-            annotations:
-                external-dns.alpha.kubernetes.io/hostname: my-podinfo.domain.org
-            spec:
+          enable: true
+          metadata:
+          annotations:
+            external-dns.alpha.kubernetes.io/hostname: my-podinfo.domain.org
+          spec:
             type: LoadBalancer
 
 This snippet adds a deployment along with a LoadBalancer service. Port 9898 is exposed.
@@ -109,6 +109,10 @@ This snippet adds a deployment along with a LoadBalancer service. Port 9898 is e
         parameter2: |
           multi-line
           value2
+        # also supports YAML
+        parameter3:
+          subParameter1: subvalue1
+          subParameter2: subvalue2
 
 ### Secrets
 
@@ -116,6 +120,11 @@ This snippet adds a deployment along with a LoadBalancer service. Port 9898 is e
     secrets:
       database-credentials:
         password: S3cur3P@ssw0rd
+        # also supports YAML
+        sensitive-config.yaml:
+          api:
+            url: https://some.api.com/v1
+            key: absys6-d-7
 
 ### SealedSecrets
 
