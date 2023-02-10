@@ -1,0 +1,16 @@
+roles:
+  ns-pod-reader:
+    rules:
+      readPods:
+        apiGroups: [""]
+        resources: [pods]
+        verbs: [get, watch, list]
+      readLogs:
+        apiGroups: [""]
+        resources: [pods/logs]
+        verbs: [get, list, watch]
+    bind:
+      sa/pod-reader: {}
+      serviceAccount/pod-reader-2: {}
+      user/john: {}
+      group/developers: {}

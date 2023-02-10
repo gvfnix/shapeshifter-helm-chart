@@ -1,0 +1,53 @@
+{{- range $roleName, $roleData := $.Values.roles }}
+{{- $clusterRole := ($roleData.clusterRole | default false)}}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+{{- $kind := ternary "ClusterRole" "Role" $clusterRole }}
+kind: {{ $kind }}
+metadata:
+  name: {{ $roleName }}
+  {{- if eq $kind "Role" }}
+  namespace: {{ $.Release.Namespace }}
+  {{- end }}
+  labels:
+    helm.sh/release: "{{ $.Release.Name }}"
+    {{- include "get.labels" $roleData | nindent 4 }}
+  {{- with ($roleData.metadata).annotations }}
+  annotations:
+  {{- include "get.annotations" $roleData | nindent 4 }}
+  {{- end }}
+rules:
+{{- range $ruleName, $ruleData := $roleData.rules }}
+  - {{- toYaml $ruleData | nindent 4 }}
+{{- end }}
+---
+{{- $subjKindMap := dict "sa" "ServiceAccount" "serviceaccount" "ServiceAccount" "user" "User" "group" "Group" }}
+{{- $subjApiGroupMap := dict "ServiceAccount" "" "User" "rbac.authorization.k8s.io" "Group" "rbac.authorization.k8s.io" }}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: {{ printf "%s%s" $kind "Binding" }}
+metadata:
+  name: {{ $roleName }}
+  {{- if eq $kind "Role" }}
+  namespace: {{ $.Release.Namespace }}
+  {{- end }}
+  labels:
+    helm.sh/release: "{{ $.Release.Name }}"
+    {{- include "get.labels" $roleData | nindent 4 }}
+  {{- with ($roleData.metadata).annotations }}
+  annotations:
+  {{- include "get.annotations" $roleData | nindent 4 }}
+  {{- end }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: {{ $kind }}
+  name: {{ $roleName }}
+subjects:
+{{- range $subjName, $subjData := $roleData.bind }}
+  {{- $subjShortKindAndName := split "/" $subjName }}
+  {{- $subjKind := index $subjKindMap (lower $subjShortKindAndName._0) }}
+  {{- $subjApiGroup := index $subjApiGroupMap $subjKind }}
+  - apiGroup: "{{ $subjApiGroup }}"
+    kind: {{ $subjKind }}
+    name: {{ lower $subjShortKindAndName._1 }}
+{{- end }}
+{{- end }}
