@@ -1,0 +1,22 @@
+suite: Test configMap
+release:
+  name: test
+  revision: 1
+templates: [configMaps.yaml]
+tests:
+  - it: Checks if configMap is filled correctly
+    values: [configMap_values.yaml]
+    asserts:
+      - hasDocuments:
+          count: 1
+      - equal:
+          path: data.[config.yaml]
+          value: |
+            log:
+              level: info
+              type: journal
+      - equal:
+          path: data.[application.properties]
+          value: |
+            log.type=journal
+            log.level=info

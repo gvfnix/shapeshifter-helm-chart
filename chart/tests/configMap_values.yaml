@@ -1,0 +1,9 @@
+configMaps:
+  map1:
+    config.yaml:
+      log:
+        type: journal
+        level: info
+    application.properties: |
+      log.type=journal
+      log.level=info

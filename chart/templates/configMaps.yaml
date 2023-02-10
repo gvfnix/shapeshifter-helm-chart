@@ -7,5 +7,13 @@ metadata:
   labels:
     helm.sh/release: "{{ $.Release.Name }}"
 data:
-  {{- toYaml $cmData | nindent 2 }}
+{{- range $cmDataKey, $cmDataValue := $cmData }}
+{{- if kindIs "map" $cmDataValue }}
+  {{ $cmDataKey }}: |
+  {{- toYaml $cmDataValue | nindent 4 }}
+{{- else }}
+  {{ $cmDataKey }}: |
+    {{- $cmDataValue | nindent 4 }}
+{{- end }}
+{{- end }}
 {{- end }}
