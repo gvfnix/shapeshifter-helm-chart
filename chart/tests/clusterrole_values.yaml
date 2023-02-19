@@ -1,0 +1,11 @@
+roles:
+  reloader:
+    clusterRole: yes
+    rules:
+      readPods:
+        apiGroups: [apps]
+        resources: [deployments]
+        resourceNames: [main-app]
+        verbs: [get, patch]
+    bind:
+      sa/main-app: true

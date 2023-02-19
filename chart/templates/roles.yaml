@@ -42,12 +42,14 @@ roleRef:
   kind: {{ $kind }}
   name: {{ $roleName }}
 subjects:
-{{- range $subjName, $subjData := $roleData.bind }}
+{{- range $subjName, $shouldBind := $roleData.bind }}
   {{- $subjShortKindAndName := split "/" $subjName }}
   {{- $subjKind := index $subjKindMap (lower $subjShortKindAndName._0) }}
   {{- $subjApiGroup := index $subjApiGroupMap $subjKind }}
+  {{- if $shouldBind }}
   - apiGroup: "{{ $subjApiGroup }}"
     kind: {{ $subjKind }}
     name: {{ lower $subjShortKindAndName._1 }}
+  {{- end }}
 {{- end }}
 {{- end }}

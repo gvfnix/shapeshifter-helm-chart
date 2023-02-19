@@ -10,7 +10,8 @@ roles:
         resources: [pods/logs]
         verbs: [get, list, watch]
     bind:
-      sa/pod-reader: {}
-      serviceAccount/pod-reader-2: {}
-      user/john: {}
-      group/developers: {}
+      sa/pod-reader: true
+      serviceAccount/pod-reader-2: true
+      user/john: true
+      group/developers: true
+      group/others: false

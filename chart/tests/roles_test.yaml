@@ -1,0 +1,113 @@
+suite: Test job spec
+release:
+  name: test
+  namespace: test
+  revision: 1
+templates: [roles.yaml]
+tests:
+  - it: Checks Role properties
+    values: [role_values.yaml]
+    asserts:
+      - hasDocuments:
+          count: 2
+      - isKind:
+          of: Role
+        documentIndex: 0
+      - equal:
+          path: metadata.namespace
+          value: test
+        documentIndex: 0
+      - contains:
+          path: rules
+          content:
+            apiGroups: [""]
+            resources: [pods]
+            verbs: [get, watch, list]
+        documentIndex: 0
+      - contains:
+          path: rules
+          content:
+            apiGroups: [""]
+            resources: [pods/logs]
+            verbs: [get, list, watch]
+        documentIndex: 0
+      - isKind:
+          of: RoleBinding
+        documentIndex: 1
+      - equal:
+          path: roleRef.name
+          value: ns-pod-reader
+        documentIndex: 1
+      - contains:
+          path: subjects
+          content:
+            apiGroup: ""
+            kind: ServiceAccount
+            name: pod-reader
+        documentIndex: 1
+      - contains:
+          path: subjects
+          content:
+            apiGroup: ""
+            kind: ServiceAccount
+            name: pod-reader-2
+        documentIndex: 1
+      - contains:
+          path: subjects
+          content:
+            apiGroup: rbac.authorization.k8s.io
+            kind: User
+            name: john
+        documentIndex: 1
+      - contains:
+          path: subjects
+          content:
+            apiGroup: rbac.authorization.k8s.io
+            kind: Group
+            name: developers
+        documentIndex: 1
+      - notContains:
+          path: subjects
+          content:
+            apiGroup: rbac.authorization.k8s.io
+            kind: Group
+            name: others
+        documentIndex: 1
+  - it: Checks ClusterRole properties
+    values: [clusterrole_values.yaml]
+    asserts:
+      - hasDocuments:
+          count: 2
+      - isKind:
+          of: ClusterRole
+        documentIndex: 0
+      - equal:
+          path: metadata.name
+          value: reloader
+        documentIndex: 0
+      - contains:
+          path: rules
+          content:
+            apiGroups: [apps]
+            resources: [deployments]
+            resourceNames: [main-app]
+            verbs: [get, patch]
+        documentIndex: 0
+      - isKind:
+          of: ClusterRoleBinding
+        documentIndex: 1
+      - equal:
+          path: metadata.name
+          value: reloader
+        documentIndex: 1
+      - equal:
+          path: roleRef.name
+          value: reloader
+        documentIndex: 1
+      - contains:
+          path: subjects
+          content:
+            apiGroup: ""
+            kind: ServiceAccount
+            name: main-app
+        documentIndex: 1
