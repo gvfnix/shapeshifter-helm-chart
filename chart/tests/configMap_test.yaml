@@ -12,11 +12,23 @@ tests:
       - equal:
           path: data.[config.yaml]
           value: |
-            log:
-              level: info
-              type: journal
+            global:
+            log_level: debug
+            nesting:
+              level1.path: global.nesting.[level1.path]
+              level2:
+                path: global.nesting.leve2.path
       - equal:
-          path: data.[application.properties]
+          path: data.[config.yml]
           value: |
-            log.type=journal
-            log.level=info
+            global:
+              log_level: debug
+      - equal:
+          path: data.[config.ini]
+          value: |
+            [global]
+            log_level = debug
+      - equal:
+          path: data.[config.properties]
+          value: |
+            global.log_level = debug

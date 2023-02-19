@@ -105,17 +105,16 @@ This snippet adds a deployment along with a LoadBalancer service. Port 9898 is e
 
 ### ConfigMaps
 
-    #values.yml
-    configMaps:
-      simple-conf:
-        parameter1: value1
-        parameter2: |
-          multi-line
-          value2
-        # also supports YAML
-        parameter3:
-          subParameter1: subvalue1
-          subParameter2: subvalue2
+See [configmMap_values.yaml](./chart/tests/configMap_values.yaml) for more info. It is pretty obvious how `configMaps` property works.
+
+The chart also transforms what you set in your configMaps. It depends on the suffix of configMap data key.
+
+| Key suffix | Description |
+|------------|-------------|
+| `*.yaml` or `*.yml` | Renders whole value as YAML. Value can have any depth of nesting. |
+| `*.json` | Renders whole value as JSON. Value can have any depth of nesting.
+| `*.properties` | Renders value as properties file (key = value). Value cannot be nested (just `{"key": "value"}`). |
+| `*.ini` | Renders values as ini file. Values must have one level of nesting (`{"section": {"key": "value"}}`). |
 
 ### Secrets
 
