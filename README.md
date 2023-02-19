@@ -8,10 +8,13 @@ A chart user (developer or devops engineer) specifies the resources they need to
 * Deployment
 * Service
 * Secret
-* SealedSecret (bitnami)
+* [SealedSecret](https://github.com/bitnami-labs/sealed-secrets)
 * ConfigMap
 * Job
 * CronJob
+* Role, RoleBinding
+* ClusterRole, ClusterRoleBinding
+* ServiceAccount
 * Custom resources
 
 As lists are not easy to merge, this chart is aimed to make overriding values as convenient as possible. It avoids lists usage in values.
@@ -249,3 +252,40 @@ Service properties:
 * `spec` (map): additional service properties (see [API reference](https://kubernetes.io/docs/reference/kubernetes-api/service-resources/service-v1/)).
 
 Currently service exposes all containerPorts.
+
+### ServiceAccounts
+
+In the table below `^^^` means "See [API reference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#serviceaccount-v1-core) for the field with the same name".
+
+| Property | Description |
+|----------|-------------|
+| `serviceAccounts.{{$name}}` | Defines a ServiceAccount with name `{{$name}}`. In the table below `//` means `serviceAccounts.{{$name}}`. |
+| `//.metadata.labels` | ^^^ |
+| `//.metadata.annotations` | Defines annotations for then serviceAccount (useful for [AWS IRSA](https://docs.aws.amazon.com/eks/latest/userguide/iam-roles-for-service-accounts.html) or [GKE workload identity](https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity)). |
+| `//.imagePullSecrets` | ^^^ |
+| `//.automountServiceAccountToken` | ^^^ |
+| `//.secrets` | ^^^ |
+
+### Roles
+
+In the table below `^^^` means "See [API reference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#role-v1-rbac-authorization-k8s-io) for the field with the same name".
+
+| Property | Description |
+|----------|-------------|
+| `roles.{{$name}}` | Defines a Role with name `{{$name}}`. In the table below `//` means `roles.{{$name}}`. |
+| `//.clusterRole` | Defines if the role is actually a ClusterRole (boolean). |
+| `//.metadata.labels` | ^^^ |
+| `//.metadata.annotations` | ^^^ |
+| `//.rules` | ^^^ |
+| `//.bind` | Map of the entities that are included in RoleBinding / ClusterRoleBinding. See description below. |
+
+#### Role / ClusterRole bind
+
+Binding is specified as `<type>/<name>: true` where `type` can be one of:
+
+* `sa` or `serviceaccount` - specifies the ServiceAccount to bind.
+* `user` - specifies the User to bind.
+* `group` - specifies the Group to bind.
+
+`role.reader.bind.group/developers: true` means that `developers` group will be included in `RoleBinding.subjects`.
+`role.reader.bind.sa/other: false` means that `other` ServiceAccount will not be included in `RoleBinding.subjects`.
