@@ -105,16 +105,68 @@ This snippet adds a deployment along with a LoadBalancer service. Port 9898 is e
 
 ### ConfigMaps
 
-See [configmMap_values.yaml](./chart/tests/configMap_values.yaml) for more info. It is pretty obvious how `configMaps` property works.
+| Property | Description |
+|----------|-------------|
+| `configMaps.{{$name}}` | Defines a ConfigMap resource with name `{{$name}}`. In the table below `//` means `configMaps.{{$name}}`. |
+| `//.{{$key}}` | Defines data under specific key. |
 
-The chart also transforms what you set in your configMaps. It depends on the suffix of configMap data key.
+See [configMap_values.yaml](./chart/tests/configMap_values.yaml) for examples. This file can be rendered into actual manifest by calling `helm template test chart -f ./chart/tests/configMap_values.yaml`.
 
-| Key suffix | Description |
-|------------|-------------|
-| `*.yaml` or `*.yml` | Renders whole value as YAML. Value can have any depth of nesting. |
-| `*.json` | Renders whole value as JSON. Value can have any depth of nesting.
-| `*.properties` | Renders value as properties file (key = value). Value cannot be nested (just `{"key": "value"}`). |
-| `*.ini` | Renders values as ini file. Values must have one level of nesting (`{"section": {"key": "value"}}`). |
+#### ConfigMaps transformations
+
+To make overriding easier, this chart offers the feature of transforming YAML to other formats in configMaps. It does so by getting data key suffix and can handle `.yaml`, `.yml`, `.json`, `.ini` and `.properties` suffixes. If the data key does not have any of these suffixes, it gets renderred as plain text.
+
+***.properties transformation**
+
+When you need your configMap to store a `*.properties` file, you can use the following structure:
+
+    configMaps:
+      application-config:
+        application.properties:
+          spring.datasource.driver-class-name: com.mysql.jdbc.Driver
+          spring.datasource.url: mysql://mysql-host.example.com/schemaname
+
+The chart detects `.properties` suffix for the configMap data key and renders this into the following manifest:
+
+    ---
+    apiVersion: v1
+    kind: ConfigMap
+    metadata:
+      name: application-config
+    data:
+      application.properties: |
+        spring.datasource.driver-class-name=com.mysql.jdbc.Driver
+        spring.datasource.url=mysql://mysql-host.example.com/schemaname
+
+***.ini transformation**
+
+When you need your configMap to store a `*.ini` file, you can use the following structure:
+
+    configMaps:
+      application-config:
+        grafana.ini:
+          server:
+            protocol: https
+          paths:
+            logs: /srv/logs/grafana
+          security:
+            admin_user: admin
+
+The chart detects `.ini` suffix for the configMap data key and renders this into the following manifest:
+
+    ---
+    apiVersion: v1
+    kind: ConfigMap
+    metadata:
+      name: application-config
+    data:
+      grafana.ini: |
+        [server]
+        protocol = https
+        [paths]
+        logs = /srv/logs/grafana
+        [security]
+        admin_user = admin
 
 ### Secrets
 

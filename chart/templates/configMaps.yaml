@@ -9,14 +9,16 @@ metadata:
     helm.sh/release: "{{ $.Release.Name }}"
 data:
 {{- range $cmDataKey, $cmDataValue := $cmData }}
-  {{ $cmDataKey }}: |
   {{- if or (hasSuffix ".yaml" $cmDataKey) (hasSuffix ".yml" $cmDataKey) }}
+  {{ $cmDataKey }}: |
   {{- toYaml $cmDataValue | nindent 4 }}
   {{- else if hasSuffix ".properties" $cmDataKey }}
+  {{ $cmDataKey }}: |
   {{- range $propertyName, $propertyValue := $cmDataValue }}
-    {{ printf "%s = %s" $propertyName $propertyValue }}
+    {{ printf "%s=%s" $propertyName $propertyValue }}
   {{- end }}
   {{- else if hasSuffix ".ini" $cmDataKey }}
+  {{ $cmDataKey }}: |
   {{- range $sectionName, $sectionData := $cmDataValue }}
     {{ printf "[%s]" $sectionName}}
   {{- range $propertyName, $propertyValue := $sectionData}}
@@ -24,8 +26,9 @@ data:
   {{- end }}
   {{- end }}
   {{- else if hasSuffix ".json" $cmDataKey }}
-    {{ toJson $cmDataValue }}
+  {{ $cmDataKey }}: '{{ toJson $cmDataValue }}'
   {{- else }}
+  {{ $cmDataKey }}: |
   {{ $cmDataValue | nindent 4 }}
   {{- end }}
 {{- end }}

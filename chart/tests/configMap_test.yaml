@@ -13,11 +13,11 @@ tests:
           path: data.[config.yaml]
           value: |
             global:
-            log_level: debug
-            nesting:
-              level1.path: global.nesting.[level1.path]
-              level2:
-                path: global.nesting.leve2.path
+              audit:
+                events:
+                - ack
+                - syn
+              log_level: debug
       - equal:
           path: data.[config.yml]
           value: |
@@ -31,4 +31,7 @@ tests:
       - equal:
           path: data.[config.properties]
           value: |
-            global.log_level = debug
+            global.log_level=debug
+      - equal:
+          path: data.[config.json]
+          value: '{"global":{"log_level":"debug"}}'

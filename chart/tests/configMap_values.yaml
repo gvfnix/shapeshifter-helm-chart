@@ -2,11 +2,11 @@ configMaps:
   configs:
     config.yaml:
       global:
+        audit:
+          events:
+          - ack
+          - syn
         log_level: debug
-        nesting:
-          level1.path: global.nesting.[level1.path]
-          level2:
-            path: global.nesting.leve2.path
     config.yml:
       global:
         log_level: debug
@@ -18,4 +18,3 @@ configMaps:
     config.json:
       global:
         log_level: debug
-
