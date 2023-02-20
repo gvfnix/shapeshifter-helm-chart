@@ -1,9 +1,20 @@
 configMaps:
-  map1:
+  configs:
     config.yaml:
-      log:
-        type: journal
-        level: info
-    application.properties: |
-      log.type=journal
-      log.level=info
+      global:
+        audit:
+          events:
+          - ack
+          - syn
+        log_level: debug
+    config.yml:
+      global:
+        log_level: debug
+    config.ini:
+      global:
+        log_level: debug
+    config.properties:
+      global.log_level: debug
+    config.json:
+      global:
+        log_level: debug

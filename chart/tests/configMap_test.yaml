@@ -12,11 +12,26 @@ tests:
       - equal:
           path: data.[config.yaml]
           value: |
-            log:
-              level: info
-              type: journal
+            global:
+              audit:
+                events:
+                - ack
+                - syn
+              log_level: debug
       - equal:
-          path: data.[application.properties]
+          path: data.[config.yml]
           value: |
-            log.type=journal
-            log.level=info
+            global:
+              log_level: debug
+      - equal:
+          path: data.[config.ini]
+          value: |
+            [global]
+            log_level = debug
+      - equal:
+          path: data.[config.properties]
+          value: |
+            global.log_level=debug
+      - equal:
+          path: data.[config.json]
+          value: '{"global":{"log_level":"debug"}}'

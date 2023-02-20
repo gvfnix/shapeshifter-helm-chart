@@ -1,3 +1,4 @@
+{{- $cmDataTypeMap := dict "yaml" "yaml" "yml" "yaml" "ini" "ini" "properties" "properties" }}
 {{- range $cmName, $cmData := $.Values.configMaps }}
 ---
 apiVersion: v1
@@ -8,12 +9,27 @@ metadata:
     helm.sh/release: "{{ $.Release.Name }}"
 data:
 {{- range $cmDataKey, $cmDataValue := $cmData }}
-{{- if kindIs "map" $cmDataValue }}
+  {{- if or (hasSuffix ".yaml" $cmDataKey) (hasSuffix ".yml" $cmDataKey) }}
   {{ $cmDataKey }}: |
   {{- toYaml $cmDataValue | nindent 4 }}
-{{- else }}
+  {{- else if hasSuffix ".properties" $cmDataKey }}
   {{ $cmDataKey }}: |
-    {{- $cmDataValue | nindent 4 }}
-{{- end }}
+  {{- range $propertyName, $propertyValue := $cmDataValue }}
+    {{ printf "%s=%s" $propertyName $propertyValue }}
+  {{- end }}
+  {{- else if hasSuffix ".ini" $cmDataKey }}
+  {{ $cmDataKey }}: |
+  {{- range $sectionName, $sectionData := $cmDataValue }}
+    {{ printf "[%s]" $sectionName}}
+  {{- range $propertyName, $propertyValue := $sectionData}}
+    {{ printf "%s = %s" $propertyName $propertyValue}}
+  {{- end }}
+  {{- end }}
+  {{- else if hasSuffix ".json" $cmDataKey }}
+  {{ $cmDataKey }}: '{{ toJson $cmDataValue }}'
+  {{- else }}
+  {{ $cmDataKey }}: |
+  {{ $cmDataValue | nindent 4 }}
+  {{- end }}
 {{- end }}
 {{- end }}
