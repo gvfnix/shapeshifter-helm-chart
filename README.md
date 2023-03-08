@@ -96,8 +96,8 @@ As it can be observed, `env` section here is a map rather than a list. This make
         service:
           enable: true
           metadata:
-          annotations:
-            external-dns.alpha.kubernetes.io/hostname: my-podinfo.domain.org
+            annotations:
+              external-dns.alpha.kubernetes.io/hostname: my-podinfo.domain.org
           spec:
             type: LoadBalancer
 

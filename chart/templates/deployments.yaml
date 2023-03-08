@@ -37,11 +37,11 @@ apiVersion: v1
 kind: Service
 metadata:
   name: "{{ $deploymentName }}"
-  {{- if .annotations }}
   labels:
     helm.sh/release: "{{ $.Release.Name }}"
     deployment: "{{ $deploymentName }}"
     {{- include "get.labels" $deploymentConf | nindent 4 }}
+  {{- if (.metadata).annotations }}
   annotations:
     {{- include "get.annotations" . | nindent 4 }}
   {{- end }}
@@ -56,7 +56,7 @@ spec:
     - name: {{ $portName }}
       protocol: {{ coalesce $portConf.protocol "TCP" }}
       port: {{ coalesce $portConf.servicePort $portConf.containerPort }}
-      targetPort: {{ $portConf.containerPort }}
+      targetPort: {{ $portName }}
   {{- end }}
   {{- end }}
   {{- with $deploymentConf.service.spec }}

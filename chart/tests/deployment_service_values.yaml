@@ -1,0 +1,19 @@
+deployments:
+  podinfo-deploy:
+    pod:
+      containers:
+        app:
+          image:
+            repository: quay.io/stefanprodan/podinfo
+            tag: "3.3.1"
+          ports:
+            http:
+              containerPort: 9898
+    service:
+      enable: true
+      metadata:
+        annotations:
+          external-dns.alpha.kubernetes.io/hostname: podinfo-deploy.example.org
+      spec:
+        type: LoadBalancer
+        loadBalancerSourceRanges: [0.0.0.0/0]
