@@ -1,0 +1,69 @@
+suite: Test service
+release:
+  name: test
+  revision: 1
+tests:
+  - it: Checks if service is set up correctly for a deployment
+    template: deployments.yaml
+    values: [deployment_service_values.yaml]
+    asserts:
+      - hasDocuments:
+          count: 2
+      - equal:
+          path: metadata.annotations.[external-dns.alpha.kubernetes.io/hostname]
+          value: podinfo-deploy.example.org
+        documentIndex: 1
+      - equal:
+          path: spec.type
+          value: LoadBalancer
+        documentIndex: 1
+      - equal:
+          path: spec.loadBalancerSourceRanges
+          value: [0.0.0.0/0]
+        documentIndex: 1
+      - equal:
+          path: spec.ports
+          value:
+            - name: http
+              port: 9898
+              targetPort: http
+              protocol: TCP
+        documentIndex: 1
+  - it: Checks that service is set up correctly for an sts
+    template: statefulSets.yaml
+    values: [sts_service_values.yaml]
+    asserts:
+      - hasDocuments:
+          count: 3
+      - equal:
+          path: metadata.annotations.[external-dns.alpha.kubernetes.io/hostname]
+          value: podinfo-sts.example.org
+        documentIndex: 2
+      - equal:
+          path: spec.type
+          value: LoadBalancer
+        documentIndex: 2
+      - contains:
+          path: spec.ports
+          content:
+            name: http
+            port: 80
+            targetPort: http
+            protocol: TCP
+        documentIndex: 2
+      - contains:
+          path: spec.ports
+          content:
+            name: https
+            port: 443
+            targetPort: https
+            protocol: TCP
+        documentIndex: 2
+      - contains:
+          path: spec.ports
+          content:
+            name: sip
+            port: 5060
+            targetPort: sip
+            protocol: UDP
+        documentIndex: 2

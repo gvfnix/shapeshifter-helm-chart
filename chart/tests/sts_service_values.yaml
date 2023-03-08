@@ -1,0 +1,26 @@
+statefulSets:
+  podinfo-sts:
+    pod:
+      containers:
+        app:
+          image:
+            repository: quay.io/stefanprodan/podinfo
+            tag: "3.3.1"
+          ports:
+            http:
+              containerPort: 9898
+              servicePort: 80
+            https:
+              containerPort: 8443
+              servicePort: 443
+            sip:
+              containerPort: 5060
+              protocol: UDP
+    service:
+      enable: true
+      metadata:
+        annotations:
+          external-dns.alpha.kubernetes.io/hostname: podinfo-sts.example.org
+      spec:
+        type: LoadBalancer
+        loadBalancerSourceRanges: [0.0.0.0/0]

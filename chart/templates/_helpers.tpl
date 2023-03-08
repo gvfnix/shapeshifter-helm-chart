@@ -4,16 +4,22 @@
 {{- end }}
 {{- end }}
 
+#######################################
+
 {{- define "get.annotations" }}
 {{- with (.metadata).annotations }}
 {{- toYaml . -}}
 {{- end }}
 {{- end }}
 
+#######################################
+
 {{- define "config.checksum" }}
 {{- $conf := dict ".configMaps" .configMaps ".secrets" .secrets ".sealedSecrets" .sealedSecrets -}}
 checksum.config: "{{ toJson $conf | sha1sum }}"
 {{- end }}
+
+#######################################
 
 {{- define "spec.containers" }}
 {{- range $containerName, $containerConf := . }}
@@ -125,6 +131,8 @@ checksum.config: "{{ toJson $conf | sha1sum }}"
   {{- end }}
 {{- end }}
 {{- end }}
+
+#######################################
 
 {{- define "spec.pod" }}
 {{- with .affinity }}
@@ -244,4 +252,11 @@ serviceAccountName: {{ . }}
 securityContext:
 {{- toYaml . | nindent 2 }}
 {{- end }}
+{{- end }}
+
+#######################################
+
+# TODO: define a common template for rendering a service
+
+{{- define "render.svc" }}
 {{- end }}
